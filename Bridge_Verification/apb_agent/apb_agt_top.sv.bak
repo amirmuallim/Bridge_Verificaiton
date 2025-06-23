@@ -1,0 +1,40 @@
+class apb_agt_top extends uvm_env;
+
+	// FACTORY REGISTRATION //
+	
+	`uvm_component_utils(apb_agt_top)
+
+	// AGT[], ENV_CFG DECLARATAION //
+	
+	apb_agt agt[];
+
+	env_cfg cfg;
+
+	// CONSTRUCTOR //
+	
+	function new(string n = "apb_agt_top", uvm_component p);
+		super.new(n, p);
+
+	endfunction 
+
+	// BUILD PHASE //
+	
+	function void build_phase(uvm_phase phase);
+		super.build_phase(p);
+
+		if(!uvm_config_db #(env_cfg)::get(this, "", "env_cfg", cfg))
+			`uvm_fatal("APB_AGT_TOP", "Can't env_cfg in apb_agt_top")
+
+		agt = new[cfg.no_of_apb_agt];
+
+		foreach(agt[i])
+		begin
+			agt[i] = apb_agt::type_id::create($sformatf("agt[%0d]", i),this);
+
+			uvm_config_db #(apb_agt_cfg)::set(this,$sformatf("agt[%0d]", i), "apb_agt_cfg", cfg.apb_cfg[i]);
+
+		end
+	endfunction
+
+endclass
+

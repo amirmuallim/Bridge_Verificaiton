@@ -1,0 +1,39 @@
+`timescale 1ns/1ps
+
+module top;
+
+	// Package imports //
+	import umv_pkg::*;
+	import bridge_test_pkg::*;
+	`include "macros.svh"
+
+	// CLOCK GENERATION //
+	
+	bit clk = 1'b0;
+	always #5 clk = ~clk; // 100 MHz 
+
+	// INTERFACE DECLARATION //
+	
+	bridge_if ahb_if(clk);
+	bridge_if apb_if(clk);
+
+	// DUT INSTANTIATION //
+	
+	// to be completed
+
+	initial begin
+
+		// SETTING INTERFACES IN CONFIG DB AS VIRTUAL //
+
+		uvm_config_db #(virtual bridge_if)::set(null, "*", "vif_ahb", ahb_if);
+		uvm_config_db #(virtual bridge_if)::set(null, "*", "vif_apb", apb_if);
+
+		// RUN_TEST //
+
+		run_test();
+
+	end
+
+endmodule
+
+

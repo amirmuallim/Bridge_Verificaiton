@@ -1,0 +1,56 @@
+class sb extends uvm_scoreboard;
+
+	// FACTORY REGISTRATION //
+	
+	`uvm_component_utils(sb)
+
+	// XTN'S FOR COVERAGE, SB, ANALYSIS FIFO, ENV CFG DECLARATION //
+	
+	ahb_xtn m_xtn;
+	apb_xtn s_xtn;
+
+	ahb_xtn m_xtn_c;
+	apb_xtn s_xtn_c;
+
+	uvm_tlm_analysis_fifo #(ahb_xtn) fifo_ahb[];
+	uvm_tlm_analysis_fifo #(apb_xtn) fifo_apb[];
+
+	env_cfg cfg;
+
+	// DATA VERIFIED COUNT //
+	
+	// CONSTRUCTOR //
+	
+	function new(string n = "sb", uvm_component p);
+		super.new(n, p);
+		// COVERAGE DATA , COVERGROUP 
+	endfunction
+
+	// BUILD_PHASE //
+	
+	function void build_phase(uvm_phase phase);
+		super.build_phase(phase);
+
+		if(!uvm_config_db #(env_cfg)::get(this, "", "env_cfg", cfg))
+			`uvm_fatal("SB", "Can't get ENV CFG IN SB")
+
+		fifo_ahb = new[cfg.no_of_ahb_agt];
+		fifo_apb = new[cfg.no_of_apb_agt];
+
+		foreach(fifo_ahb[i])
+		begin
+			fifo_ahb[i] = new($sformatf("fifo_ahb[%0d]", i),this);
+		end
+
+		foreach(fifo_apb[i])
+		begin
+			fifo_apb[i] = new($sformatf("fifo_apb[%0d]", i), this);
+		end
+
+	endfunction
+
+	// RUN PHASE //
+	
+endclass
+
+

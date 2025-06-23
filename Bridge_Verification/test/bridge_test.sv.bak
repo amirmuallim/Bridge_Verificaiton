@@ -1,0 +1,80 @@
+class bridge_test extends uvm_test;
+
+	// FACTORY REGISTRATION //
+	
+	`uvm_component_utils(bridge_test)
+
+	env_cfg e_cfg;
+	env env_h;
+
+	ahb_agt_cfg m_cfg[];
+	apb_agt_cfg s_cfg[];
+
+	int no_of_ahb_agt = 1;
+	int no_of_apb_agt = 1;
+	bit has_sb = 1;
+	
+	function new(string n = "bridge_test", uvm_component p);
+		super.new(n, p);
+	endfunction
+
+	function void build_phase(uvm_phase phase);
+		super.build_phase(p);
+
+		e_cfg = env_cfg::type_id::create("e_cfg", this);
+
+		if(e_cfg.has_ahb_agt)
+		begin
+			e_cfg.ahb_cfg= new[no_of_ahb_agt];
+		end
+
+		if(e_cfg.has_apb_agt)
+		begin
+			e_cfg.apb_cfg= new[no_of_apb_agt];
+		end
+
+		m_cfg = new[no_of_ahb_agt];
+		s_cfg = new[no_of_apb_agt];
+
+		foreach(m_cfg[i])
+		begin
+			m_cfg[i] = ahb_agt_cfg::type_id::create($sformatf("ahb_cfg[%0d]", i));
+			if(!uvm_config_db #(virtual bridge_if)::get(this, "", "vif_ahb", m_cfg[i].vif))
+				`uvm_fatal("TEST", "Cant get if for ahb_cfg")
+
+			m_cfg[i].is_active = UVM_ACTIVE;
+			
+			e_cfg.ahb_cfg[i] = m_cfg[i];
+		end
+
+		foreach(s_cfg[i])
+		begin
+			s_cfg[i] = apb_agt_cfg::type_id::create($sformatf("apb_cfg[%0d]", i));
+			if(!uvm_config_db #(virtual bridge_if)::get(this, "", "vif_apb", s_cfg[i].vif))
+				`uvm_fatal("TEST", "Cant get if for apb_cfg")
+
+			s_cfg[i].is_active = UVM_ACTIVE;
+			
+			e_cfg.apb_cfg[i] = s_cfg[i];
+		end
+
+
+		e_cfg.no_of_ahb_agt = no_of_ahb_agt;
+		e_cfg.no_of_apb_agt = no_of_apb_agt;
+		e_cfg.has_sb = has_sb;
+	
+
+		uvm_config_db #(env_cfg)::set(this, "*", "env_cfg", e_cfg);
+
+		env_h = env::type_id::create("env_h", this);
+		
+	endfunction
+
+	task run_phase(uvm_phase phase);
+	
+		uvm_top.print_topology();
+	endtask	
+
+endclass
+
+
